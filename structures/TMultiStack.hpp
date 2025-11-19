@@ -63,7 +63,6 @@ public:
     Iterator(const TMultiStack<T>* ms, int stack, int pos);
     
     T& operator*();
-    const T& operator*() const;
     Iterator& operator++();
     Iterator operator++(int);
     bool operator==(const Iterator& other) const;
@@ -600,17 +599,6 @@ TMultiStack<T>::Iterator::Iterator(const TMultiStack<T>* ms, int stack, int pos)
 
 template<typename T>
 T& TMultiStack<T>::Iterator::operator*()
-{
-  if (currentStack >= multiStack->stackCount)
-  {
-    throw "Iterator out of bounds";
-  }
-  int pos = multiStack->stackStarts[currentStack] + currentPosition;
-  return const_cast<T&>(multiStack->memory[pos]);
-}
-
-template<typename T>
-const T& TMultiStack<T>::Iterator::operator*() const
 {
   if (currentStack >= multiStack->stackCount)
   {
