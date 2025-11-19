@@ -5,15 +5,8 @@
 TEST(TMultiStackTest, DefaultConstructor)
 {
     TMultiStack<int> multiStack;
-    EXPECT_EQ(multiStack.GetTotalCapacity(), 100);
-    EXPECT_EQ(multiStack.GetStackCount(), 3);
-    
-    for (int i = 0; i < 3; ++i)
-    {
-        EXPECT_TRUE(multiStack.IsEmpty(i));
-        EXPECT_FALSE(multiStack.IsFull(i));
-        EXPECT_EQ(multiStack.GetSize(i), 0);
-    }
+    EXPECT_EQ(multiStack.GetTotalCapacity(), 0);
+    EXPECT_EQ(multiStack.GetStackCount(), 0);
 }
 
 TEST(TMultiStackTest, ConstructorWithParameters)
@@ -362,7 +355,7 @@ TEST(TMultiStackTest, DifferentDataTypes)
     EXPECT_EQ(stringMultiStack.Top(1), "bar");
     
     TMultiStack<double> doubleMultiStack(100, 2);
-    doubleMultiStack.Push(0, 3.14);
+    doubleMultiStack.Push(0, 3.14); 
     doubleMultiStack.Push(1, 2.71);
     
     EXPECT_DOUBLE_EQ(doubleMultiStack.Top(0), 3.14);

@@ -2,7 +2,14 @@
 #include "TMultiStack.hpp"
 
 int main()
-{  
+{
+  std::cout << "=== TMultiStack Demo ===" << std::endl;
+  
+  std::cout << "\n1. Default constructor (empty multistack):" << std::endl;
+  TMultiStack<int> emptyStack;
+  std::cout << "Empty multistack - capacity: " << emptyStack.GetTotalCapacity() << ", stacks: " << emptyStack.GetStackCount() << std::endl;
+  
+  std::cout << "\n2. Parameterized constructor:" << std::endl;
   TMultiStack<int> multiStack(20, 3);
   
   std::cout << "Created multistack with 3 stacks, total capacity: " << multiStack.GetTotalCapacity() << std::endl;
@@ -28,42 +35,4 @@ int main()
   std::cout << "Stack 0 top: " << multiStack.Top(0) << std::endl;
   std::cout << "Stack 1 top: " << multiStack.Top(1) << std::endl;
   std::cout << "Stack 2 top: " << multiStack.Top(2) << std::endl;
-  
-  std::cout << "\nPopping from stack 0..." << std::endl;
-  std::cout << "Value before pop: " << multiStack.Top(0) << std::endl;
-  multiStack.Pop(0);
-  std::cout << "New stack 0 top: " << multiStack.Top(0) << std::endl;
-  
-  std::cout << "\nTesting memory expansion by filling stack 0..." << std::endl;
-  for (int i = 0; i < 10; ++i)
-  {
-    multiStack.Push(0, 40 + i);
-    std::cout << "Pushed " << (40 + i) << ", total capacity now: " << multiStack.GetTotalCapacity() << std::endl;
-  }
-  
-  std::cout << "\nFinal state:" << std::endl;
-  std::cout << multiStack << std::endl;
-  
-  std::cout << "\nTesting iterator..." << std::endl;
-  std::cout << "All elements: ";
-  for (auto it = multiStack.begin(); it != multiStack.end(); ++it)
-  {
-    std::cout << *it << " ";
-  }
-  std::cout << std::endl;
-  
-  std::cout << "\nTesting copy constructor..." << std::endl;
-  TMultiStack<int> copy(multiStack);
-  std::cout << "Copy created successfully" << std::endl;
-  std::cout << "Original == Copy: " << (multiStack == copy ? "true" : "false") << std::endl;
-  
-  std::cout << "\nTesting with strings..." << std::endl;
-  TMultiStack<std::string> stringStack(15, 2);
-  stringStack.Push(0, "Hello");
-  stringStack.Push(0, "World");
-  stringStack.Push(1, "C++");
-  stringStack.Push(1, "MultiStack");
-  
-  std::cout << stringStack << std::endl;
-  return 0;
 }

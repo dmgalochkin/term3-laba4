@@ -75,13 +75,8 @@ public:
 };
 
 template<typename T>
-TMultiStack<T>::TMultiStack() : totalCapacity(100), stackCount(3)
+TMultiStack<T>::TMultiStack() : totalCapacity(0), stackCount(0), memory(nullptr), stackStarts(nullptr), stackCapacities(nullptr), stackSizes(nullptr)
 {
-  memory = new T[totalCapacity];
-  stackStarts = new int[stackCount];
-  stackCapacities = new int[stackCount];
-  stackSizes = new int[stackCount];
-  InitializeStacks();
 }
 
 template<typename T>
@@ -264,7 +259,7 @@ void TMultiStack<T>::Push(int stackIndex, const T& value)
       
       if (IsFull(stackIndex))
       {
-        throw "Cannot push: all stacks are full";
+        throw "All stacks are full";
       }
     }
   }
