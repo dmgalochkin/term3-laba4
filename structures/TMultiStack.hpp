@@ -234,32 +234,18 @@ void TMultiStack<T>::Push(int stackIndex, const T& value)
   
   if (IsFull(stackIndex))
   {
-    RepackInternal(stackIndex);
-    if (IsFull(stackIndex))
+    int totalUsed = FindTotalUsedSpace();
+    if (totalUsed < totalCapacity)
     {
-      int newCapacity = totalCapacity * 2;
-      T* newMemory = new T[newCapacity];
-      
-      for (int i = 0; i < stackCount; ++i)
-      {
-        int oldStart = stackStarts[i];
-        int size = stackSizes[i];
-        for (int j = 0; j < size; ++j)
-        {
-          newMemory[oldStart + j] = memory[oldStart + j];
-        }
-      }
-      
-      delete[] memory;
-      memory = newMemory;
-      totalCapacity = newCapacity;
-      
       RepackInternal(stackIndex);
-      
       if (IsFull(stackIndex))
       {
         throw "All stacks are full";
       }
+    }
+    else
+    {
+      throw "All stacks are full";
     }
   }
   
@@ -391,56 +377,28 @@ template<typename T>
 void TMultiStack<T>::RepackInternal(int overflowStack)
 {
   int totalUsed = FindTotalUsedSpace();
-  int freeSpace = totalCapacity - totalUsed;
-  
-  bool needExpansion = false;
-  
-  if (overflowStack >= 0 && IsFull(overflowStack))
-  {
-    if (freeSpace == 0)
-    {
-      needExpansion = true;
-    }
-  }
-  
-  if (needExpansion)
-  {
-    int newCapacity = totalCapacity * 2;
-    T* newMemory = new T[newCapacity];
-    
-    for (int i = 0; i < stackCount; ++i)
-    {
-      int oldStart = stackStarts[i];
-      int size = stackSizes[i];
-      for (int j = 0; j < size; ++j)
-      {
-        newMemory[oldStart + j] = memory[oldStart + j];
-      }
-    }
-    
-    delete[] memory;
-    memory = newMemory;
-    totalCapacity = newCapacity;
-    freeSpace = totalCapacity - totalUsed;
-  }
   
   int* newStarts = new int[stackCount];
   int* newCapacities = new int[stackCount];
   
-  int baseCapacity = totalCapacity / stackCount;
-  int remainder = totalCapacity % stackCount;
-  
-  int totalAllocated = 0;
   for (int i = 0; i < stackCount; ++i)
   {
-    newCapacities[i] = std::max(stackSizes[i], baseCapacity + (i < remainder ? 1 : 0));
-    totalAllocated += newCapacities[i];
+    newCapacities[i] = stackSizes[i];
   }
   
-  int extraSpace = totalCapacity - totalAllocated;
-  if (overflowStack >= 0 && extraSpace > 0)
+  int freeSpace = totalCapacity - totalUsed;
+  if (overflowStack >= 0 && freeSpace > 0)
   {
-    newCapacities[overflowStack] += extraSpace;
+    newCapacities[overflowStack] += freeSpace;
+  }
+  else if (freeSpace > 0)
+  {
+    int extraPerStack = freeSpace / stackCount;
+    int remainder = freeSpace % stackCount;
+    for (int i = 0; i < stackCount; ++i)
+    {
+      newCapacities[i] += extraPerStack + (i < remainder ? 1 : 0);
+    }
   }
   
   int currentPos = 0;
@@ -450,34 +408,46 @@ void TMultiStack<T>::RepackInternal(int overflowStack)
     currentPos += newCapacities[i];
   }
   
-  T* tempMemory = new T[totalUsed];
-  int tempIndex = 0;
-  
-  for (int i = 0; i < stackCount; ++i)
+  if (totalUsed > 0)
   {
-    int oldStart = stackStarts[i];
-    int size = stackSizes[i];
-    for (int j = 0; j < size; ++j)
+    T* tempMemory = new T[totalUsed];
+    int tempIndex = 0;
+    
+    for (int i = 0; i < stackCount; ++i)
     {
-      tempMemory[tempIndex++] = memory[oldStart + j];
-    }
-  }
-  
-  tempIndex = 0;
-  for (int i = 0; i < stackCount; ++i)
-  {
-    int newStart = newStarts[i];
-    int size = stackSizes[i];
-    for (int j = 0; j < size; ++j)
-    {
-      memory[newStart + j] = tempMemory[tempIndex++];
+      int oldStart = stackStarts[i];
+      int size = stackSizes[i];
+      for (int j = 0; j < size; ++j)
+      {
+        tempMemory[tempIndex++] = memory[oldStart + j];
+      }
     }
     
-    stackStarts[i] = newStart;
-    stackCapacities[i] = newCapacities[i];
+    tempIndex = 0;
+    for (int i = 0; i < stackCount; ++i)
+    {
+      int newStart = newStarts[i];
+      int size = stackSizes[i];
+      for (int j = 0; j < size; ++j)
+      {
+        memory[newStart + j] = tempMemory[tempIndex++];
+      }
+      
+      stackStarts[i] = newStart;
+      stackCapacities[i] = newCapacities[i];
+    }
+    
+    delete[] tempMemory;
+  }
+  else
+  {
+    for (int i = 0; i < stackCount; ++i)
+    {
+      stackStarts[i] = newStarts[i];
+      stackCapacities[i] = newCapacities[i];
+    }
   }
   
-  delete[] tempMemory;
   delete[] newStarts;
   delete[] newCapacities;
 }

@@ -191,7 +191,7 @@ TEST(TMultiStackTest, TopOnEmptyStack)
 
 TEST(TMultiStackTest, StatusChecks)
 {
-    TMultiStack<int> multiStack(6, 3); // Each stack gets capacity 2
+    TMultiStack<int> multiStack(6, 3);
     
     EXPECT_TRUE(multiStack.IsEmpty(0));
     EXPECT_FALSE(multiStack.IsFull(0));
@@ -225,15 +225,18 @@ TEST(TMultiStackTest, GettersWithInvalidIndex)
 
 TEST(TMultiStackTest, RepackOperation)
 {
-    TMultiStack<int> multiStack(9, 3); // Each stack gets capacity 3
+    TMultiStack<int> multiStack(9, 3);
     
-    // Fill first stack completely
     multiStack.Push(0, 1);
     multiStack.Push(0, 2);
     multiStack.Push(0, 3);
     EXPECT_TRUE(multiStack.IsFull(0));
     
-    // This should trigger repack
+    multiStack.Push(1, 10);
+    multiStack.Push(2, 20);
+    
+    multiStack.Pop(1);
+    
     multiStack.Push(0, 4);
     EXPECT_EQ(multiStack.GetSize(0), 4);
     EXPECT_EQ(multiStack.Top(0), 4);
@@ -249,7 +252,6 @@ TEST(TMultiStackTest, ManualRepack)
     int oldCapacity0 = multiStack.GetCapacity(0);
     multiStack.Repack();
     
-    // After repack, data should still be intact
     EXPECT_EQ(multiStack.GetSize(0), 1);
     EXPECT_EQ(multiStack.GetSize(1), 1);
     EXPECT_EQ(multiStack.GetSize(2), 1);
@@ -318,7 +320,6 @@ TEST(TMultiStackTest, IteratorBasicFunctionality)
     }
     
     EXPECT_EQ(values.size(), 5);
-    // Values should be in order: stack 0 elements, then stack 1, then stack 2
     EXPECT_EQ(values[0], 1);
     EXPECT_EQ(values[1], 2);
     EXPECT_EQ(values[2], 10);
@@ -366,26 +367,22 @@ TEST(TMultiStackTest, LIFOBehaviorPerStack)
 {
     TMultiStack<int> multiStack(30, 2);
     
-    // Fill stack 0
     for (int i = 1; i <= 5; ++i)
     {
         multiStack.Push(0, i);
     }
     
-    // Fill stack 1
     for (int i = 10; i <= 15; ++i)
     {
         multiStack.Push(1, i);
     }
     
-    // Check LIFO for stack 0
     for (int i = 5; i >= 1; --i)
     {
         EXPECT_EQ(multiStack.Top(0), i);
         multiStack.Pop(0);
     }
     
-    // Check LIFO for stack 1
     for (int i = 15; i >= 10; --i)
     {
         EXPECT_EQ(multiStack.Top(1), i);
@@ -398,19 +395,19 @@ TEST(TMultiStackTest, LIFOBehaviorPerStack)
 
 TEST(TMultiStackTest, MemoryExpansion)
 {
-    TMultiStack<int> multiStack(6, 2); // Very small capacity to force expansion
+    TMultiStack<int> multiStack(6, 2);
     
-    // Fill beyond initial capacity
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 6; ++i)
     {
         multiStack.Push(0, i);
     }
     
-    EXPECT_EQ(multiStack.GetSize(0), 10);
-    EXPECT_GT(multiStack.GetTotalCapacity(), 6); // Should have expanded
+    EXPECT_EQ(multiStack.GetSize(0), 6);
+    EXPECT_EQ(multiStack.GetTotalCapacity(), 6);
     
-    // Verify data integrity
-    for (int i = 9; i >= 0; --i)
+    ASSERT_ANY_THROW(multiStack.Push(0, 999));
+    
+    for (int i = 5; i >= 0; --i)
     {
         EXPECT_EQ(multiStack.Top(0), i);
         multiStack.Pop(0);
@@ -421,7 +418,6 @@ TEST(TMultiStackTest, ComplexScenario)
 {
     TMultiStack<int> multiStack(20, 4);
     
-    // Add elements to different stacks
     multiStack.Push(0, 1);
     multiStack.Push(0, 2);
     multiStack.Push(1, 10);
@@ -430,19 +426,16 @@ TEST(TMultiStackTest, ComplexScenario)
     multiStack.Push(2, 22);
     multiStack.Push(3, 30);
     
-    // Test sizes
     EXPECT_EQ(multiStack.GetSize(0), 2);
     EXPECT_EQ(multiStack.GetSize(1), 1);
     EXPECT_EQ(multiStack.GetSize(2), 3);
     EXPECT_EQ(multiStack.GetSize(3), 1);
     
-    // Test tops
     EXPECT_EQ(multiStack.Top(0), 2);
     EXPECT_EQ(multiStack.Top(1), 10);
     EXPECT_EQ(multiStack.Top(2), 22);
     EXPECT_EQ(multiStack.Top(3), 30);
     
-    // Pop some elements
     EXPECT_EQ(multiStack.Top(2), 22);
     multiStack.Pop(2);
     EXPECT_EQ(multiStack.Top(2), 21);
@@ -450,7 +443,6 @@ TEST(TMultiStackTest, ComplexScenario)
     EXPECT_EQ(multiStack.GetSize(2), 1);
     EXPECT_EQ(multiStack.Top(2), 20);
     
-    // Test iterator
     std::vector<int> allElements;
     for (auto it = multiStack.begin(); it != multiStack.end(); ++it)
     {
